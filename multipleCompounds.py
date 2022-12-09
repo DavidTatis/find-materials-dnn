@@ -92,46 +92,61 @@ elements = ["H","Li","Be","B","C","N","O","F","Na","Mg","Al",
 
 # Na, Cl, K3, P, O4,  Li, F
 # Na2HPO4
+
+
 # Na Cl Na2 H P O4 Li F
 
-naIndex=elements.index("Na")
-clIndex=elements.index("Cl")
-kIndex=elements.index("K")
-pIndex=elements.index("P")
-oIndex=elements.index("O")
-liIndex=elements.index("Li")
-fIndex=elements.index("F")
-print(naIndex,clIndex,kIndex,pIndex,oIndex,liIndex,fIndex)
+# Na3 Cl H P O4 Li F
 
-atoms=[1,1,3,1,4,1,1]
+
+elementsToUse=["Na","Cl","Na","H","P","O","Li","F"]
+atoms=[1,1,2,1,1,4,1,1]
+elementsIndex=[elements.index(e) for e in elementsToUse]
+
+maxMol=10
+posibilities=[]
+population=[]
 formated={}
 byAtoms={}
-posibilities=[]
-
-maxMol=50
-population=[]
 for x in range(1,maxMol):
-	for y in range(1,maxMol):
-		for z in range(1,10):
-			temp=[atoms[0]*x,atoms[1]*x,atoms[2]*y,atoms[3]*y,atoms[4]*y,atoms[5]*z,atoms[6]*z]
-			posibilities.insert(0,temp)
-			ratios = [0]*len(elements)
+    for y in range(1,maxMol):
+        for z in range(1,5):
 
-			a=ratios[naIndex]=round(temp[0]/sum(temp),3)
-			b=ratios[clIndex]=round(temp[1]/sum(temp),3)
-			c=ratios[kIndex]=round(temp[2]/sum(temp),3)
-			d=ratios[pIndex]=round(temp[3]/sum(temp),3)
-			e=ratios[oIndex]=round(temp[4]/sum(temp),3)
-			f=ratios[liIndex]=round(temp[5]/sum(temp),3)
-			g=ratios[fIndex]=round(temp[6]/sum(temp),3)			
-			if f"Na{a},Cl{b},K{c},P{d},O{e},Li{f},F{g}" not in formated:
-				population.insert(len(population),ratios)
-				formated[f"Na{a},Cl{b},K{c},P{d},O{e},Li{f},F{g}"] = len(population)-1 #save the index where is the compound  in the population
-				byAtoms[f"Na{x}, Cl{x}, K{y}*3, P{y}, O{y}*4, Li{z}, F{z}"]=len(population)-1 #save the index where is the compound  in the population
-				
-				
+            temp=[atoms[0]*x,
+                    atoms[1]*x,
+                    # end first compound
+                    atoms[2]*y,
+                    atoms[3]*y,
+                    atoms[4]*y,
+                    atoms[5]*y,
+                    # end second compound
+                    atoms[6]*z,
+                    atoms[7]*z
+                    # end third compound
+                    ]
+            
+            ratios = [0]*len(elements)
+            
+            formatedCompound=""
+            byAtomsCompound=""
+            for i in range(len(elementsIndex)):
+                ratios[elementsIndex[i]]+=round(temp[i]/sum(temp),3)
+                
+                
+            totalAtoms=[round(atom/sum(temp),3) for atom in temp]
+            for i in range(len(elementsToUse)):
+                formatedCompound+=elementsToUse[i]+str(totalAtoms[i])+", "
+                
+                
 
-# print(list(formated))
+            if(formatedCompound not in formated):
+                population.insert(len(population),ratios)
+                formated[formatedCompound]=len(population)-1 #save the index where is the compound  in the population
+                byAtoms[f"x={x},y={y}, z={z}"]=len(population)-1 #save the index where is the compound  in the population
+
+
+
+
 print("total predictions: ",len(formated))
 
 model=create_new_model()
